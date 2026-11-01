@@ -11,7 +11,7 @@ const stone=mat(0x9e907b),lightStone=mat(0xb4a58d),darkStone=mat(0x62584b),sand=
 function surfaceTexture(base,kind='stone'){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');
  ctx.fillStyle=base;ctx.fillRect(0,0,256,256);
- for(let i=0;i<kind==='stone'?900:650;i++){const x=Math.random()*256,y=Math.random()*256,a=kind==='metal'?.035:.09;ctx.fillStyle=Math.random()>.5?'rgba(255,240,210,'+a+')':'rgba(20,15,10,'+a+')';const s=kind==='metal'?1+Math.random()*2:1+Math.random()*4;ctx.fillRect(x,y,s,s)}
+ for(let i=0;i<(kind==='stone'?900:650);i++){const x=Math.random()*256,y=Math.random()*256,a=kind==='metal'?.035:.09;ctx.fillStyle=Math.random()>.5?'rgba(255,240,210,'+a+')':'rgba(20,15,10,'+a+')';const s=kind==='metal'?1+Math.random()*2:1+Math.random()*4;ctx.fillRect(x,y,s,s)}
  if(kind==='stone'){ctx.strokeStyle='rgba(48,39,29,.22)';ctx.lineWidth=1;for(let i=0;i<18;i++){const x=Math.random()*256,y=Math.random()*256;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(Math.random()-.5)*35,y+(Math.random()-.5)*35);ctx.stroke()}}
  if(kind==='wood'){ctx.strokeStyle='rgba(20,12,7,.28)';for(let i=0;i<22;i++){const y=Math.random()*256;ctx.beginPath();ctx.moveTo(0,y);ctx.bezierCurveTo(70,y-5,170,y+5,256,y+(Math.random()-.5)*8);ctx.stroke()}}
  if(kind==='metal'){ctx.strokeStyle='rgba(245,220,170,.25)';for(let i=0;i<30;i++){const x=Math.random()*256,y=Math.random()*256;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.random()*16,y+Math.random()*3);ctx.stroke()}}
