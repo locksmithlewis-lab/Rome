@@ -10,3 +10,26 @@
 #start,#campaign{z-index:10;pointer-events:auto}
 #start .modal,#campaign .modal{position:relative;z-index:11;pointer-events:auto}
 #start .btn,#campaign .btn{position:relative;z-index:12;pointer-events:auto;touch-action:manipulation}
+
+
+/* Finished Roman title screen — real button, no placeholder panel. */
+#start{background:radial-gradient(ellipse at 50% 38%,rgba(117,79,39,.30),transparent 48%),linear-gradient(115deg,rgba(12,12,10,.96),rgba(25,21,16,.94),rgba(10,10,9,.97));backdrop-filter:blur(5px)}
+.title-screen{position:relative;width:min(760px,100%);padding:clamp(28px,5vw,58px) 24px 30px;text-align:center;border:1px solid rgba(190,151,91,.65);background:linear-gradient(145deg,rgba(40,34,25,.97),rgba(16,16,14,.98));box-shadow:0 28px 100px #000, inset 0 0 50px rgba(190,151,91,.06);overflow:hidden}
+.title-screen:before,.title-screen:after{content:"";position:absolute;left:18px;right:18px;height:1px;background:linear-gradient(90deg,transparent,#b58b50,transparent)}
+.title-screen:before{top:12px}.title-screen:after{bottom:12px}
+.title-kicker{font-size:10px;letter-spacing:4px;color:#c6a36c;font-weight:700}
+.title-mark{font-family:Georgia,serif;font-size:32px;color:#c39a55;margin:18px 0 4px;text-shadow:0 0 22px rgba(195,154,85,.3)}
+.title-screen h1{font:800 clamp(38px,7vw,70px) Cinzel,Georgia,serif;letter-spacing:3px;line-height:1.05;margin:0;color:#ead8b5;text-shadow:0 4px 20px #000}
+.title-rule{height:1px;width:min(330px,70%);margin:20px auto;background:linear-gradient(90deg,transparent,#b58b50,transparent)}
+.title-lead{font:700 13px Cinzel,serif;letter-spacing:4px;color:#d0ad76;margin:0 0 12px}
+.title-copy{max-width:490px;margin:0 auto 24px!important;font-size:14px;line-height:1.8;color:#d0c4ae!important}
+.mission-strip{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 auto 26px}
+.mission-strip span{padding:9px 12px;border:1px solid rgba(181,139,80,.28);background:rgba(0,0,0,.22);font-size:9px;letter-spacing:1.2px;color:#c9b99e}
+.mission-strip b{color:#c69b5e;margin-right:5px}
+#start .start-cta{display:flex;align-items:center;justify-content:center;gap:26px;width:min(340px,100%);min-height:58px;margin:0 auto;padding:0 22px;border:1px solid #e1bd7c;background:linear-gradient(180deg,#a7793e,#765027);box-shadow:0 5px 0 #432d19,0 12px 30px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.2);font:800 14px Cinzel,serif;letter-spacing:2px;color:#fff1d5;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+#start .start-cta:hover{filter:brightness(1.18);transform:translateY(-2px);box-shadow:0 7px 0 #432d19,0 16px 34px rgba(0,0,0,.5)}
+#start .start-cta:active{transform:translateY(3px);box-shadow:0 2px 0 #432d19,0 6px 18px rgba(0,0,0,.4)}
+#start .start-cta:focus-visible{outline:3px solid #f0d29c;outline-offset:5px}
+.cta-arrow{font:24px Georgia,serif;line-height:1}
+.title-foot{margin-top:25px;font-size:9px;letter-spacing:1.6px;color:#92836c}
+.title-foot i{font-style:normal;color:#bd9255;padding:0 5px}
