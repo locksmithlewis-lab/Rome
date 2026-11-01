@@ -4,10 +4,25 @@ document.querySelector('#app').innerHTML = '<div id="game"><div id="topbar"><div
 
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x9b8a72);scene.fog=new THREE.Fog(0x9b8a72,28,78);
 const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,120);camera.position.set(0,1.7,8);
-const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;document.querySelector('#game').prepend(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;document.querySelector('#game').prepend(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xe1e7ed,0x554331,2));const sun=new THREE.DirectionalLight(0xffdfb2,2);sun.position.set(-9,18,10);scene.add(sun);
 const mat=(c,r=.85,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const stone=mat(0x9e907b),lightStone=mat(0xb4a58d),darkStone=mat(0x62584b),sand=mat(0x9a805b),red=mat(0x742b27),redDark=mat(0x451d1b),bronze=mat(0x9b713d,.48,.62),gold=mat(0xc39a55,.42,.68),iron=mat(0x59636a,.34,.82),steel=mat(0xaab4b8,.26,.88),leather=mat(0x493126),skin=mat(0xb98261),wood=mat(0x63452c),green=mat(0x42533c);
+function surfaceTexture(base,kind='stone'){
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const ctx=canvas.getContext('2d');
+ ctx.fillStyle=base;ctx.fillRect(0,0,256,256);
+ for(let i=0;i<kind==='stone'?900:650;i++){const x=Math.random()*256,y=Math.random()*256,a=kind==='metal'?.035:.09;ctx.fillStyle=Math.random()>.5?'rgba(255,240,210,'+a+')':'rgba(20,15,10,'+a+')';const s=kind==='metal'?1+Math.random()*2:1+Math.random()*4;ctx.fillRect(x,y,s,s)}
+ if(kind==='stone'){ctx.strokeStyle='rgba(48,39,29,.22)';ctx.lineWidth=1;for(let i=0;i<18;i++){const x=Math.random()*256,y=Math.random()*256;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(Math.random()-.5)*35,y+(Math.random()-.5)*35);ctx.stroke()}}
+ if(kind==='wood'){ctx.strokeStyle='rgba(20,12,7,.28)';for(let i=0;i<22;i++){const y=Math.random()*256;ctx.beginPath();ctx.moveTo(0,y);ctx.bezierCurveTo(70,y-5,170,y+5,256,y+(Math.random()-.5)*8);ctx.stroke()}}
+ if(kind==='metal'){ctx.strokeStyle='rgba(245,220,170,.25)';for(let i=0;i<30;i++){const x=Math.random()*256,y=Math.random()*256;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.random()*16,y+Math.random()*3);ctx.stroke()}}
+ const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=2;return t;
+}
+stone.map=surfaceTexture('#9e907b');lightStone.map=surfaceTexture('#b4a58d');darkStone.map=surfaceTexture('#62584b');
+sand.map=surfaceTexture('#9a805b');red.map=surfaceTexture('#742b27','cloth');redDark.map=surfaceTexture('#451d1b','cloth');
+bronze.map=surfaceTexture('#9b713d','metal');gold.map=surfaceTexture('#c39a55','metal');iron.map=surfaceTexture('#59636a','metal');steel.map=surfaceTexture('#aab4b8','metal');
+leather.map=surfaceTexture('#493126','leather');wood.map=surfaceTexture('#63452c','wood');green.map=surfaceTexture('#42533c','cloth');
+for(const m of [stone,lightStone,darkStone,sand,red,redDark,bronze,gold,iron,steel,leather,wood,green])m.needsUpdate=true;
+
 function box(p,x,y,z,a,b,c,m){const o=new THREE.Mesh(new THREE.BoxGeometry(a,b,c),m);o.position.set(x,y,z);p.add(o);return o}
 function cyl(p,x,y,z,a,b,h,m,n=8){const o=new THREE.Mesh(new THREE.CylinderGeometry(a,b,h,n),m);o.position.set(x,y,z);p.add(o);return o}
 function ball(p,x,y,z,r,m){const o=new THREE.Mesh(new THREE.SphereGeometry(r,10,7),m);o.position.set(x,y,z);p.add(o);return o}
@@ -26,8 +41,12 @@ function makeSword(parent){const g=new THREE.Group();parent.add(g);cyl(g,0,-.43,
 function makeShield(parent){const g=new THREE.Group();parent.add(g);box(g,0,0,0,.72,1.02,.12,red);for(const x of [-.35,.35])box(g,x,0,.075,.055,1.04,.06,bronze);for(const y of [-.48,.48])box(g,0,y,.075,.72,.055,.06,bronze);const boss=new THREE.Mesh(new THREE.SphereGeometry(.18,10,7),bronze);boss.scale.set(1,.85,.42);boss.position.z=.12;g.add(boss);box(g,0,0,.085,.07,.78,.04,gold);g.position.set(-.48,-.38,-.82);g.rotation.set(.04,0,.12);return g}
 const rig=new THREE.Group();camera.add(rig);scene.add(camera);const sword=makeSword(rig),shield=makeShield(rig);
 
-function makeEnemy(x,z){const root=new THREE.Group();scene.add(root);root.position.set(x,0,z);const torso=new THREE.Group();torso.position.y=1.05;root.add(torso);cyl(torso,0,0,0,.43,.53,1.05,red,9);for(let y=-.35;y<=.35;y+=.18)box(torso,0,y,.31,.76,.105,.12,bronze);box(torso,0,-.38,.02,.9,.1,.58,leather);for(let i=-2;i<=2;i++)box(torso,i*.15,-.58,.31,.12,.34,.06,redDark);
+function makeEnemy(x,z){const root=new THREE.Group();scene.add(root);root.position.set(x,0,z);const torso=new THREE.Group();torso.position.y=1.05;root.add(torso);cyl(torso,0,0,0,.43,.53,1.05,red,9);for(let y=-.35;y<=.35;y+=.18){box(torso,0,y,.31,.76,.105,.12,bronze);for(const side of [-1,1]){const rivet=new THREE.Mesh(new THREE.SphereGeometry(.027,6,5),gold);rivet.position.set(side*.31,y,.39);torso.add(rivet)}}box(torso,0,-.38,.02,.9,.1,.58,leather);
+const strap=box(torso,0,.02,.375,.105,.78,.045,leather);strap.rotation.z=-.34;const clasp=box(torso,.12,-.24,.42,.16,.12,.035,gold);for(let i=-2;i<=2;i++)box(torso,i*.15,-.58,.31,.12,.34,.06,redDark);
 const head=new THREE.Group();head.position.set(0,.68,0);torso.add(head);ball(head,0,.12,0,.25,skin);const helmet=new THREE.Mesh(new THREE.SphereGeometry(.29,10,7,0,Math.PI*2,0,Math.PI*.56),bronze);helmet.position.y=.2;head.add(helmet);box(head,0,.34,0,.09,.55,.08,red);box(head,0,-.02,.23,.42,.09,.07,gold);
+for(const side of [-1,1]){const cheek=box(head,side*.2,-.02,.12,.12,.28,.12,bronze);cheek.rotation.z=side*.18}
+const crestBase=box(head,0,.43,-.015,.12,.12,.48,redDark);crestBase.rotation.x=.18;
+for(let i=-2;i<=2;i++){const plume=box(head,i*.045,.52,.015,.035,.2,.42,red);plume.rotation.x=.18}
 const arms=[],legs=[];for(const side of [-1,1]){const a=new THREE.Group();a.position.set(side*.48,.32,0);torso.add(a);cyl(a,0,-.3,0,.13,.12,.58,skin,7);box(a,0,-.34,.02,.25,.2,.27,bronze);arms.push(a);const l=new THREE.Group();l.position.set(side*.2,-.53,0);root.add(l);cyl(l,0,-.38,0,.18,.14,.72,redDark,7);box(l,0,-.7,.09,.29,.16,.42,leather);legs.push(l)}
 const enemyShield=makeShield(root);enemyShield.position.set(-.68,1.08,.04);enemyShield.scale.set(.88,.94,.9);const enemySword=makeSword(root);enemySword.position.set(.65,1.12,.05);enemySword.scale.set(.68,.68,.68);
 return {root,torso,head,arms,legs,enemyShield,enemySword,alive:true,hp:100,walk:0,cooldown:0,hit:0}}
