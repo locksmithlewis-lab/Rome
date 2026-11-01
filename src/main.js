@@ -94,7 +94,7 @@ const weaponGroups={gladius:sword};
 function handWeapon(type){const g=new THREE.Group();rig.add(g);
 if(type==='spear'||type==='pilum'){cyl(g,0,0,0,.035,.045,1.75,wood,7);cyl(g,0,.91,0,.012,.095,.42,type==='pilum'?iron:steel,6);if(type==='pilum')cyl(g,0,.55,0,.018,.018,.55,iron,6);g.position.set(.43,-.34,-.92)}
 if(type==='spath a'){box(g,0,.1,0,.095,1,.035,steel);box(g,0,-.48,0,.34,.07,.1,bronze);cyl(g,0,-.7,0,.045,.05,.35,leather,7);g.position.set(.48,-.36,-.82)}
-if(type==='axe'){cyl(g,0,-.1,0,.04,.05,1.05,wood,7);prop(0,0,0,0,0,0,wood);const h=new THREE.Mesh(new THREE.BoxGeometry(.42,.36,.09),iron);h.position.set(.16,.35,0);g.add(h);const e=new THREE.Mesh(new THREE.BoxGeometry(.12,.43,.1),steel);e.position.set(.38,.35,0);g.add(e);g.position.set(.48,-.36,-.8)}
+if(type==='axe'){cyl(g,0,-.1,0,.04,.05,1.05,wood,7);const h=new THREE.Mesh(new THREE.BoxGeometry(.42,.36,.09),iron);h.position.set(.16,.35,0);g.add(h);const e=new THREE.Mesh(new THREE.BoxGeometry(.12,.43,.1),steel);e.position.set(.38,.35,0);g.add(e);g.position.set(.48,-.36,-.8)}
 if(type==='bow'){const curve=new THREE.QuadraticBezierCurve3(new THREE.Vector3(0,-.65,0),new THREE.Vector3(.42,0,0),new THREE.Vector3(0,.65,0));g.add(new THREE.Mesh(new THREE.TubeGeometry(curve,16,.035,5,false),wood));g.position.set(.48,-.34,-.82)}
 if(type==='dagger'){box(g,0,.18,0,.075,.58,.025,steel);box(g,0,-.18,0,.24,.05,.08,bronze);g.position.set(.48,-.38,-.78)}
 g.visible=false;return g}
