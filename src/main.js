@@ -146,7 +146,7 @@ selectWeapon('gladius');
 // Load the Blender-built frontier when its GLB is present. Keep the procedural
 // environment as a fallback, and merge static meshes by material for Intel HD GPUs.
 const frontierLoader=new GLTFLoader();
-frontierLoader.load('/assets/Roman_Frontier_Ultra.glb',gltf=>{
+frontierLoader.load('/Roman_Frontier_Ultra.glb',gltf=>{
   try{
     const imported=gltf.scene;
     imported.updateMatrixWorld(true);
