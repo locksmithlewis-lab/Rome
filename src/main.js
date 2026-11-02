@@ -61,8 +61,44 @@ function drop(mesh,pos,vel){const o=mesh.clone(true);o.traverse(v=>{if(v.isMesh)
 function defeat(){if(!enemy.alive)return;enemy.torso.remove(enemy.head);enemy.arms.forEach(a=>enemy.torso.remove(a));enemy.alive=false;enemy.root.visible=false;won=true;glory+=100;const parts=[[enemy.torso,new THREE.Vector3(0,1.05,0),new THREE.Vector3(-1,3,1)],[enemy.head,new THREE.Vector3(0,1.9,0),new THREE.Vector3(.8,3,-.5)],[enemy.arms[0],new THREE.Vector3(-.5,1.35,0),new THREE.Vector3(-3,3,1)],[enemy.arms[1],new THREE.Vector3(.5,1.35,0),new THREE.Vector3(3,2,-1)],[enemy.legs[0],new THREE.Vector3(-.2,.55,0),new THREE.Vector3(-1,2,2)],[enemy.legs[1],new THREE.Vector3(.2,.55,0),new THREE.Vector3(1,2,-2)],[enemy.enemySword,new THREE.Vector3(.7,1.1,0),new THREE.Vector3(2,3,1)],[enemy.enemyShield,new THREE.Vector3(-.7,1.1,0),new THREE.Vector3(-2,3,1)]];
 for(const [part,offset,vel] of parts){const wp=enemy.root.localToWorld(offset.clone());drop(part,wp,vel)}msg.textContent='GLORIA ROMAE';setTimeout(()=>{active=false;document.exitPointerLock?.();document.querySelector('#campaign').classList.remove('hidden')},1500)}
 function reset(){hp=100;stamina=100;enemy.hp=100;enemy.alive=true;enemy.root.visible=true;enemy.root.position.set(0,0,-5);enemy.root.rotation.set(0,Math.PI,0);enemy.legs.forEach(l=>l.rotation.set(0,0,0));enemy.arms.forEach(a=>a.rotation.set(0,0,0));enemy.torso.rotation.set(0,0,0);enemy.head.rotation.set(0,0,0);for(const p of fallen)scene.remove(p);fallen.length=0;won=false;active=true;attacking=false;swing=0;shielding=false;document.querySelector('#campaign').classList.add('hidden');document.querySelector('#start').classList.add('hidden');msg.textContent='';camera.position.set(0,1.7,8);yaw=0;pitch=0;hud()}
-function enterArena(event){event?.preventDefault?.();event?.stopPropagation?.();if(active)return;try{reset();msg.textContent='';const lock=renderer.domElement.requestPointerLock?.();if(lock&&typeof lock.catch==='function')lock.catch(()=>{msg.textContent='ARENA READY — CLICK TO LOOK AROUND'});}catch(error){console.error('Arena start failed:',error);msg.textContent='START ERROR — '+(error?.message||'Please refresh');}}
-const beginButton=document.querySelector('#begin');beginButton.addEventListener('click',enterArena);
+function enterArena(event){
+  event?.preventDefault?.();
+  if(active)return;
+  try{
+    reset();
+    msg.textContent='ARENA READY — WASD TO MOVE';
+    // Pointer lock is optional. Never let a denied browser permission prevent gameplay.
+    try{const lock=renderer.domElement.requestPointerLock?.();if(lock&&typeof lock.catch==='function')lock.catch(()=>{msg.textContent='ARENA READY — WASD TO MOVE · CLICK GAME TO ENABLE MOUSE LOOK'});}
+    catch(_){msg.textContent='ARENA READY — WASD TO MOVE · CLICK GAME TO ENABLE MOUSE LOOK'}
+    window.setTimeout(()=>{if(active&&msg.textContent.startsWith('ARENA READY'))msg.textContent=''},3500);
+  }catch(error){
+    console.error('Arena start failed:',error);
+    msg.textContent='START ERROR — '+(error?.message||'Press Enter to retry');
+    // Keep the title screen accessible if reset ever throws.
+    document.querySelector('#start')?.classList.remove('hidden');
+  }
+}
+// Robust entry: pointerdown works on mouse and touch, Enter/Space works without a mouse,
+// and the entire title panel is an entry target so a small button hitbox cannot trap the player.
+const beginButton=document.querySelector('#begin');
+function beginFromTitle(event){
+  if(active)return;
+  event?.preventDefault?.();
+  enterArena(event);
+}
+document.addEventListener('pointerdown',event=>{
+  if(!active && event.target instanceof Element && event.target.closest('#start'))beginFromTitle(event);
+},true);
+document.addEventListener('keydown',event=>{
+  if(!active && (event.code==='Enter'||event.code==='Space') && document.querySelector('#start:not(.hidden)'))beginFromTitle(event);
+});
+beginButton?.addEventListener('click',event=>{if(!active)beginFromTitle(event)});
+// If pointer lock is unavailable (browser permission / embedded view), the game still starts.
+renderer.domElement.addEventListener('pointerdown',()=>{
+  if(active && document.pointerLockElement!==renderer.domElement){
+    try{const result=renderer.domElement.requestPointerLock?.();if(result&&result.catch)result.catch(()=>{msg.textContent='MOUSE LOOK UNAVAILABLE — USE WASD TO MOVE'});}catch(_){msg.textContent='MOUSE LOOK UNAVAILABLE — USE WASD TO MOVE'}
+  }
+});
 document.querySelector('#next').addEventListener('click',()=>{reset();renderer.domElement.requestPointerLock?.()});
 document.querySelector('#recruit').onclick=()=>{if(treasury>=40){treasury-=40;troops+=150;document.querySelector('#campaignText').textContent='Treasury: '+treasury+' denarii · Legion: '+troops}};
 document.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyF')shielding=true;const wm={Digit1:'gladius',Digit2:'spear',Digit3:'pilum',Digit4:'spatha',Digit5:'axe',Digit6:'bow',Digit7:'dagger'};if(wm[e.code])selectWeapon(wm[e.code])});document.addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyF')shielding=false});
