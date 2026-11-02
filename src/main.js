@@ -66,8 +66,12 @@ let enemy=makeEnemy(0,-5),enemies=[enemy],wave=1,legionOrder='FOLLOW',legion=[];
 function makeLegionary(x,z,index=0){
  const root=new THREE.Group();scene.add(root);cyl(root,0,1.05,0,.32,.38,.78,red,8);ball(root,0,1.65,0,.2,skin);
  const helmet=new THREE.Mesh(new THREE.SphereGeometry(.23,8,6,0,Math.PI*2,0,Math.PI*.55),bronze);helmet.position.y=1.72;root.add(helmet);
- const shield=box(root,-.4,1.02,.12,.58,.88,.12,red);box(root,-.4,1.02,.2,.07,.7,.05,gold);box(root,.38,1.08,.18,.07,.7,.04,steel);
- return {root,shield,hp:100,attack:0};
+ const shield=box(root,-.4,1.02,.12,.58,.88,.12,red);box(root,-.4,1.02,.2,.07,.7,.05,gold);
+ const weaponType=['gladius','spear','pilum','bow'][index%4];let weapon;
+ if(weaponType==='spear'||weaponType==='pilum'){weapon=cyl(root,.42,1.2,.15,.035,.045,2.05,wood,7);cyl(root,.42,2.28,.15,.012,.085,.34,steel,6);}
+ else if(weaponType==='bow'){const curve=new THREE.QuadraticBezierCurve3(new THREE.Vector3(.35,.65,.12),new THREE.Vector3(.72,1.2,.12),new THREE.Vector3(.35,1.75,.12));weapon=new THREE.Mesh(new THREE.TubeGeometry(curve,12,.035,5,false),wood);root.add(weapon);}
+ else {weapon=box(root,.42,1.25,.15,.075,.82,.06,steel);box(root,.42,.82,.15,.28,.06,.1,bronze);}
+ return {root,shield,weaponType,hp:100,attack:0};
 }
 for(let i=0;i<4;i++)legion.push(makeLegionary(-2.4+i*1.6,10+Math.floor(i/2)*1.8,i));
 function setLegionOrder(order){legionOrder=order;const t={FOLLOW:'LEGION: FOLLOW',HOLD:'LEGION: HOLD POSITION',CHARGE:'LEGION: CHARGE'};msg.textContent=t[order];setTimeout(()=>{if(msg.textContent===t[order])msg.textContent=''},1300);}
