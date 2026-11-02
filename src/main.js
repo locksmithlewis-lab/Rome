@@ -234,9 +234,9 @@ if(attacking){swing+=dt;const k=Math.min(1,swing/.48);weaponGroups[selectedWeapo
 block=THREE.MathUtils.damp(block,shielding?1:0,13,dt);shield.position.set(-.48+block*.16,-.38+block*.08,-.82+.18*block);shield.rotation.set(.04-block*.2,0,.12-block*.28);
 for(const foe of enemies){
  if(!foe.alive)continue;
- const dx=camera.position.x-foe.root.position.x,dz=camera.position.z-foe.root.position.z,d=Math.hypot(dx,dz);
+ let victim={x:camera.position.x,z:camera.position.z,soldier:null};for(const ally of legion){if(ally.hp<=0)continue;const ad=Math.hypot(ally.root.position.x-foe.root.position.x,ally.root.position.z-foe.root.position.z);const vd=Math.hypot(victim.x-foe.root.position.x,victim.z-foe.root.position.z);if(ad<vd)victim={x:ally.root.position.x,z:ally.root.position.z,soldier:ally};}const dx=victim.x-foe.root.position.x,dz=victim.z-foe.root.position.z,d=Math.hypot(dx,dz);
  foe.root.rotation.y=Math.atan2(dx,dz);foe.cooldown=Math.max(0,foe.cooldown-dt);foe.stateTimer=Math.max(0,(foe.stateTimer||0)-dt);
- if(foe.state==='windup'){
+ if(foe.state==='guard'){if(foe.stateTimer<=0)foe.state='advance';}\n else if(foe.state==='windup'){
   foe.arms[1].rotation.x=THREE.MathUtils.damp(foe.arms[1].rotation.x,-1.65,8,dt);
   if(foe.stateTimer<=0){foe.state='recover';foe.cooldown=1.0;const facing=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),toward=new THREE.Vector3(dx,0,dz).normalize(),frontal=facing.dot(toward)>.25;
    if(d<2.35&&(!shielding||stamina<12||!frontal)){hp=Math.max(0,hp-(foe.damage||9));msg.textContent='ENEMY STRIKE · FACE THE ATTACK AND HOLD F';}
@@ -244,7 +244,7 @@ for(const foe of enemies){
   }
  }else if(foe.state==='recover'||foe.state==='stagger'){foe.arms[1].rotation.x=THREE.MathUtils.damp(foe.arms[1].rotation.x,0,6,dt);if(foe.stateTimer<=0)foe.state='advance';}
  else if(d>2.05){foe.state='advance';const sp=foe.speed||1.2;foe.root.position.x+=dx/d*dt*sp;foe.root.position.z+=dz/d*dt*sp;foe.walk+=dt*7;foe.legs[0].rotation.x=Math.sin(foe.walk)*.42;foe.legs[1].rotation.x=-Math.sin(foe.walk)*.42;
-  if(d<5.5&&foe.cooldown<=0&&Math.random()<(foe.guardChance||.15)*dt*1.4){foe.state='guard';foe.stateTimer=.6;}
+  if(d<5.5&&foe.cooldown<=0&&Math.random()<(foe.guardChance||.15)*dt*1.4){foe.state='guard';foe.stateTimer=.65;foe.cooldown=.85;}
  }else if(foe.cooldown<=0){foe.state='windup';foe.stateTimer=.68;foe.cooldown=1.7;}
  if(foe.state==='guard')foe.enemyShield.position.x=THREE.MathUtils.damp(foe.enemyShield.position.x,-.25,8,dt);else foe.enemyShield.position.x=THREE.MathUtils.damp(foe.enemyShield.position.x,-.68,5,dt);
  if(foe.hit>0){foe.hit-=dt;foe.torso.rotation.x=THREE.MathUtils.damp(foe.torso.rotation.x,0,8,dt);}
