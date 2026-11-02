@@ -3,6 +3,14 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import './style.css';
 document.querySelector('#app').innerHTML = '<div id="game"><div id="topbar"><div><div class="brand">ROMA AETERNA</div><div class="sub">THE FRONTIER CAMPAIGN</div></div><div class="panel"><div class="stat">LEGIONARY</div><div class="bar"><div id="hp" class="fill health"></div></div><div class="stat">STAMINA</div><div class="bar"><div id="st" class="fill stamina"></div></div><div class="stat">ENEMY</div><div class="bar"><div id="eh" class="fill enemy"></div></div></div></div><div id="crosshair">+</div><div id="message"></div><div id="bottom">WASD move · Mouse look · Left click attack · 1–7 weapons · F raise shield · Shift sprint · Esc release mouse</div></div><div id="start"><div class="title-screen"><div class="title-kicker">ROMAN FRONTIER · TRAINING CAMPAIGN</div><div class="title-mark">✦</div><h1>RISE OF ROME</h1><div class="title-rule"></div><p class="title-lead">THE LEGION AWAITS</p><p class="title-copy">Enter the frontier training yard. Face the enemy champion, master your gladius and shield, and earn your place in the legion.</p><div class="mission-strip"><span><b>01</b> SINGLE COMBAT</span><span><b>02</b> GLADIUS & SCUTUM</span><span><b>03</b> FRONTIER YARD</span></div><button id="begin" class="btn start-cta" type="button"><span>ENTER THE ARENA</span><span class="cta-arrow">→</span></button><div class="title-foot">WASD MOVE <i>·</i> MOUSE LOOK <i>·</i> 1–7 WEAPONS <i>·</i> F BLOCK</div></div></div><div id="campaign" class="hidden"><div class="modal"><h1>VICTORIA!</h1><p>The enemy has fallen. Your victory strengthens Rome.</p><div class="provinces"><div class="province owned">ITALIA<br>ROMAN</div><div class="province owned">GALLIA<br>ROMAN</div><div class="province owned">HISPANIA<br>ROMAN</div><div class="province enemyProvince">GERMANIA<br>UNREST</div><div class="province enemyProvince">RAETIA<br>HOSTILE</div><div class="province enemyProvince">DACIA<br>HOSTILE</div></div><p id="campaignText">Treasury: 120 denarii · Legion: 800</p><button id="recruit" class="btn">RECRUIT LEGIONARIES · 40</button><button id="next" class="btn">NEXT BATTLE</button></div></div>';
+// Install the title control before WebGL setup so graphics initialization cannot leave a dead button.
+window.__romeStartQueued=false;
+window.__romeBootError=null;
+const earlyStartButton=document.querySelector('#begin');
+const showBootStatus=(message)=>{const copy=document.querySelector('#start .title-copy');if(copy)copy.textContent=message;};
+window.addEventListener('error',event=>{window.__romeBootError=event.message||'Unknown JavaScript error';showBootStatus('GAME ENGINE ERROR: '+window.__romeBootError+' — refresh the page and report this message.');});
+earlyStartButton?.addEventListener('click',event=>{event.preventDefault();if(typeof window.__romeEnterArena==='function'){window.__romeEnterArena(event);}else if(window.__romeBootError){showBootStatus('GAME ENGINE ERROR: '+window.__romeBootError+' — the game could not finish starting.');}else{window.__romeStartQueued=true;showBootStatus('STARTING THE ARENA…');}});
+
 
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x9b8a72);scene.fog=new THREE.Fog(0x9b8a72,55,155);
 const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,220);camera.position.set(0,1.7,8);
@@ -78,6 +86,8 @@ function enterArena(event){
     document.querySelector('#start')?.classList.remove('hidden');
   }
 }
+window.__romeEnterArena=enterArena;
+if(window.__romeStartQueued){window.__romeStartQueued=false;enterArena();}
 // Robust entry: pointerdown works on mouse and touch, Enter/Space works without a mouse,
 // and the entire title panel is an entry target so a small button hitbox cannot trap the player.
 const beginButton=document.querySelector('#begin');
@@ -92,7 +102,7 @@ document.addEventListener('pointerdown',event=>{
 document.addEventListener('keydown',event=>{
   if(!active && (event.code==='Enter'||event.code==='Space') && document.querySelector('#start:not(.hidden)'))beginFromTitle(event);
 });
-beginButton?.addEventListener('click',event=>{if(!active)beginFromTitle(event)});
+// The early title listener above owns the click; this handler remains a safe fallback for keyboard entry.
 // If pointer lock is unavailable (browser permission / embedded view), the game still starts.
 renderer.domElement.addEventListener('pointerdown',()=>{
   if(active && document.pointerLockElement!==renderer.domElement){
