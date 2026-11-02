@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import './style.css';
 document.querySelector('#app').innerHTML = '<div id="game"><div id="topbar"><div><div class="brand">ROMA AETERNA</div><div class="sub">THE FRONTIER CAMPAIGN</div></div><div class="panel"><div class="stat">LEGIONARY</div><div class="bar"><div id="hp" class="fill health"></div></div><div class="stat">STAMINA</div><div class="bar"><div id="st" class="fill stamina"></div></div><div class="stat">ENEMY</div><div class="bar"><div id="eh" class="fill enemy"></div></div></div></div><div id="crosshair">+</div><div id="message"></div><div id="bottom">WASD move · Mouse look · Left click attack · 1–7 weapons · F raise shield · Shift sprint · Esc release mouse</div></div><div id="start"><div class="title-screen"><div class="title-kicker">ROMAN FRONTIER · TRAINING CAMPAIGN</div><div class="title-mark">✦</div><h1>RISE OF ROME</h1><div class="title-rule"></div><p class="title-lead">THE LEGION AWAITS</p><p class="title-copy">Enter the frontier training yard. Face the enemy champion, master your gladius and shield, and earn your place in the legion.</p><div class="mission-strip"><span><b>01</b> SINGLE COMBAT</span><span><b>02</b> GLADIUS & SCUTUM</span><span><b>03</b> FRONTIER YARD</span></div><button id="begin" class="btn start-cta" type="button"><span>ENTER THE ARENA</span><span class="cta-arrow">→</span></button><div class="title-foot">WASD MOVE <i>·</i> MOUSE LOOK <i>·</i> 1–7 WEAPONS <i>·</i> F BLOCK</div></div></div><div id="campaign" class="hidden"><div class="modal"><h1>VICTORIA!</h1><p>The enemy has fallen. Your victory strengthens Rome.</p><div class="provinces"><div class="province owned">ITALIA<br>ROMAN</div><div class="province owned">GALLIA<br>ROMAN</div><div class="province owned">HISPANIA<br>ROMAN</div><div class="province enemyProvince">GERMANIA<br>UNREST</div><div class="province enemyProvince">RAETIA<br>HOSTILE</div><div class="province enemyProvince">DACIA<br>HOSTILE</div></div><p id="campaignText">Treasury: 120 denarii · Legion: 800</p><button id="recruit" class="btn">RECRUIT LEGIONARIES · 40</button><button id="next" class="btn">NEXT BATTLE</button></div></div>';
 
@@ -105,6 +107,51 @@ function selectWeapon(name){if(!weaponGroups[name])return;selectedWeapon=name;fo
 for(const [code,name] of Object.entries({Digit1:'gladius',Digit2:'spear',Digit3:'pilum',Digit4:'spatha',Digit5:'axe',Digit6:'bow',Digit7:'dagger'})){}
 
 selectWeapon('gladius');
+// Load the Blender-built frontier when its GLB is present. Keep the procedural
+// environment as a fallback, and merge static meshes by material for Intel HD GPUs.
+const frontierLoader=new GLTFLoader();
+frontierLoader.load('/assets/Roman_Frontier_Ultra.glb',gltf=>{
+  try{
+    const imported=gltf.scene;
+    imported.updateMatrixWorld(true);
+    const batches=new Map();
+    imported.traverse(node=>{
+      if(!node.isMesh||!node.geometry||Array.isArray(node.material))return;
+      const material=node.material;
+      if(!batches.has(material.uuid))batches.set(material.uuid,{material,geometries:[]});
+      const geometry=node.geometry.clone();
+      geometry.applyMatrix4(node.matrixWorld);
+      batches.get(material.uuid).geometries.push(geometry);
+    });
+    const optimized=new THREE.Group();
+    let mergedCount=0;
+    for(const batch of batches.values()){
+      if(!batch.geometries.length)continue;
+      const merged=batch.geometries.length===1?batch.geometries[0]:mergeGeometries(batch.geometries,false);
+      if(merged){
+        merged.computeBoundingSphere();
+        optimized.add(new THREE.Mesh(merged,batch.material));
+        mergedCount++;
+      }
+      for(const geometry of batch.geometries)if(geometry!==merged)geometry.dispose();
+    }
+    if(mergedCount>0){
+      // Only hide the old static environment after the imported scene is ready.
+      for(const object of scene.children)if(object.isMesh)object.visible=false;
+      scene.add(optimized);
+      console.info('Blender frontier loaded:',mergedCount,'merged material batches');
+    }else{
+      scene.add(imported);
+      console.warn('Blender frontier loaded without mesh batching; using original meshes');
+    }
+  }catch(error){
+    console.error('Frontier optimization failed; keeping procedural environment:',error);
+    scene.add(gltf.scene);
+  }
+},undefined,error=>{
+  console.info('Blender frontier GLB not found yet; using built-in frontier.',error);
+});
+
 const clock=new THREE.Clock();
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.035);
 if(active&&!won){const speed=((keys.ShiftLeft||keys.ShiftRight)?6:3.8)*dt;const f=(keys.KeyW?1:0)-(keys.KeyS?1:0),s=(keys.KeyD?1:0)-(keys.KeyA?1:0),v=new THREE.Vector3(s,0,-f);if(v.lengthSq())v.normalize().multiplyScalar(speed);v.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);camera.position.x=THREE.MathUtils.clamp(camera.position.x+v.x,-84,84);camera.position.z=THREE.MathUtils.clamp(camera.position.z+v.z,-84,84);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch;stamina=Math.min(100,stamina+(shielding?2.5:9)*dt);
