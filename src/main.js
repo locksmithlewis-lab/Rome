@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import './style.css';
-document.querySelector('#app').innerHTML = '<div id="game"><div id="topbar"><div><div class="brand">ROMA AETERNA</div><div class="sub">THE FRONTIER CAMPAIGN</div></div><div class="panel"><div class="stat">LEGIONARY</div><div class="bar"><div id="hp" class="fill health"></div></div><div class="stat">STAMINA</div><div class="bar"><div id="st" class="fill stamina"></div></div><div class="stat">ENEMY</div><div class="bar"><div id="eh" class="fill enemy"></div></div></div></div><div id="crosshair">+</div><div id="message"></div><div id="bottom">WASD move · Mouse look · Left click attack · 1–7 weapons · F raise shield · Shift sprint · Esc release mouse</div></div><div id="start"><div class="title-screen"><div class="title-kicker">ROMAN FRONTIER · TRAINING CAMPAIGN</div><div class="title-mark">✦</div><h1>RISE OF ROME</h1><div class="title-rule"></div><p class="title-lead">THE LEGION AWAITS</p><p class="title-copy">Enter the frontier training yard. Face the enemy champion, master your gladius and shield, and earn your place in the legion.</p><div class="mission-strip"><span><b>01</b> SINGLE COMBAT</span><span><b>02</b> GLADIUS & SCUTUM</span><span><b>03</b> FRONTIER YARD</span></div><button id="begin" class="btn start-cta" type="button"><span>ENTER THE ARENA</span><span class="cta-arrow">→</span></button><div class="title-foot">WASD MOVE <i>·</i> MOUSE LOOK <i>·</i> 1–7 WEAPONS <i>·</i> F BLOCK</div></div></div><div id="campaign" class="hidden"><div class="modal"><h1>VICTORIA!</h1><p>The enemy has fallen. Your victory strengthens Rome.</p><div class="provinces"><div class="province owned">ITALIA<br>ROMAN</div><div class="province owned">GALLIA<br>ROMAN</div><div class="province owned">HISPANIA<br>ROMAN</div><div class="province enemyProvince">GERMANIA<br>UNREST</div><div class="province enemyProvince">RAETIA<br>HOSTILE</div><div class="province enemyProvince">DACIA<br>HOSTILE</div></div><p id="campaignText">Treasury: 120 denarii · Legion: 800</p><button id="recruit" class="btn">RECRUIT LEGIONARIES · 40</button><button id="next" class="btn">NEXT BATTLE</button></div></div>';
+document.querySelector('#app').innerHTML = '<div id="game"><div id="topbar"><div><div class="brand">ROMA AETERNA</div><div class="sub">THE FRONTIER CAMPAIGN</div></div><div class="panel"><div class="stat">LEGIONARY</div><div class="bar"><div id="hp" class="fill health"></div></div><div class="stat">STAMINA</div><div class="bar"><div id="st" class="fill stamina"></div></div><div class="stat">ENEMY</div><div class="bar"><div id="eh" class="fill enemy"></div></div></div></div><div id="crosshair">+</div><div id="message"></div><div id="bottom">WASD move · Mouse look · Left click attack · 1–7 weapons · F block · Q follow · E hold · R charge · Shift sprint · Esc release mouse</div></div><div id="start"><div class="title-screen"><div class="title-kicker">ROMAN FRONTIER · TRAINING CAMPAIGN</div><div class="title-mark">✦</div><h1>RISE OF ROME</h1><div class="title-rule"></div><p class="title-lead">THE LEGION AWAITS</p><p class="title-copy">Enter the frontier training yard. Face the enemy champion, master your gladius and shield, and earn your place in the legion.</p><div class="mission-strip"><span><b>01</b> SINGLE COMBAT</span><span><b>02</b> GLADIUS & SCUTUM</span><span><b>03</b> FRONTIER YARD</span></div><button id="begin" class="btn start-cta" type="button"><span>ENTER THE ARENA</span><span class="cta-arrow">→</span></button><div class="title-foot">WASD MOVE <i>·</i> MOUSE LOOK <i>·</i> 1–7 WEAPONS <i>·</i> F BLOCK</div></div></div><div id="campaign" class="hidden"><div class="modal"><h1>VICTORIA!</h1><p>The enemy has fallen. Your victory strengthens Rome.</p><div class="provinces"><div class="province owned">ITALIA<br>ROMAN</div><div class="province owned">GALLIA<br>ROMAN</div><div class="province owned">HISPANIA<br>ROMAN</div><div class="province enemyProvince">GERMANIA<br>UNREST</div><div class="province enemyProvince">RAETIA<br>HOSTILE</div><div class="province enemyProvince">DACIA<br>HOSTILE</div></div><p id="campaignText">Treasury: 120 denarii · Legion: 800</p><button id="recruit" class="btn">RECRUIT LEGIONARIES · 40</button><button id="next" class="btn">NEXT BATTLE</button></div></div>';
 // Install the title control before WebGL setup so graphics initialization cannot leave a dead button.
 window.__romeStartQueued=false;
 window.__romeBootError=null;
@@ -14,7 +14,7 @@ earlyStartButton?.addEventListener('click',event=>{event.preventDefault();if(typ
 
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x9b8a72);scene.fog=new THREE.Fog(0x9b8a72,55,155);
 const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,220);camera.position.set(0,1.7,8);
-const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;document.querySelector('#game').prepend(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio,1));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=false;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;document.querySelector('#game').prepend(renderer.domElement);document.querySelector('#game').insertAdjacentHTML('beforeend','<div id="commandbar"><b>LEGION COMMAND</b><span>Q · FOLLOW</span><span>E · HOLD</span><span>R · CHARGE</span><span id="waveLabel">WAVE 1</span></div>');
 scene.add(new THREE.HemisphereLight(0xe1e7ed,0x554331,2));const sun=new THREE.DirectionalLight(0xffdfb2,2);sun.position.set(-9,18,10);scene.add(sun);
 const mat=(c,r=.85,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const stone=mat(0x9e907b),lightStone=mat(0xb4a58d),darkStone=mat(0x62584b),sand=mat(0x9a805b),red=mat(0x742b27),redDark=mat(0x451d1b),bronze=mat(0x9b713d,.48,.62),gold=mat(0xc39a55,.42,.68),iron=mat(0x59636a,.34,.82),steel=mat(0xaab4b8,.26,.88),leather=mat(0x493126),skin=mat(0xb98261),wood=mat(0x63452c),green=mat(0x42533c);
@@ -59,16 +59,36 @@ const crestBase=box(head,0,.43,-.015,.12,.12,.48,redDark);crestBase.rotation.x=.
 for(let i=-2;i<=2;i++){const plume=box(head,i*.045,.52,.015,.035,.2,.42,red);plume.rotation.x=.18}
 const arms=[],legs=[];for(const side of [-1,1]){const a=new THREE.Group();a.position.set(side*.48,.32,0);torso.add(a);cyl(a,0,-.3,0,.13,.12,.58,skin,7);box(a,0,-.34,.02,.25,.2,.27,bronze);arms.push(a);const l=new THREE.Group();l.position.set(side*.2,-.53,0);root.add(l);cyl(l,0,-.38,0,.18,.14,.72,redDark,7);box(l,0,-.7,.09,.29,.16,.42,leather);legs.push(l)}
 const enemyShield=makeShield(root);enemyShield.position.set(-.68,1.08,.04);enemyShield.scale.set(.88,.94,.9);const enemySword=makeSword(root);enemySword.position.set(.65,1.12,.05);enemySword.scale.set(.68,.68,.68);
-return {root,torso,head,arms,legs,enemyShield,enemySword,alive:true,hp:100,walk:0,cooldown:0,hit:0}}
-let enemy=makeEnemy(0,-5);const dummy=makeEnemy(-8,-8);dummy.root.scale.setScalar(.9);dummy.root.rotation.y=.3;
+return {root,torso,head,arms,legs,enemyShield,enemySword,alive:true,hp:100,maxHp:100,walk:0,cooldown:0,hit:0,state:'advance',stateTimer:0,guardChance:.12}}
+let enemy=makeEnemy(0,-5),enemies=[enemy],wave=1,legionOrder='FOLLOW',legion=[];
+function makeLegionary(x,z){
+ const root=new THREE.Group();scene.add(root);cyl(root,0,1.05,0,.32,.38,.78,red,8);ball(root,0,1.65,0,.2,skin);
+ const helmet=new THREE.Mesh(new THREE.SphereGeometry(.23,8,6,0,Math.PI*2,0,Math.PI*.55),bronze);helmet.position.y=1.72;root.add(helmet);
+ const shield=box(root,-.4,1.02,.12,.58,.88,.12,red);box(root,-.4,1.02,.2,.07,.7,.05,gold);box(root,.38,1.08,.18,.07,.7,.04,steel);
+ return {root,shield,hp:100,attack:0};
+}
+for(let i=0;i<4;i++)legion.push(makeLegionary(-2.4+i*1.6,10+Math.floor(i/2)*1.8));
+function setLegionOrder(order){legionOrder=order;const t={FOLLOW:'LEGION: FOLLOW',HOLD:'LEGION: HOLD POSITION',CHARGE:'LEGION: CHARGE'};msg.textContent=t[order];setTimeout(()=>{if(msg.textContent===t[order])msg.textContent=''},1300);}
+
 let hp=100,stamina=100,glory=0,treasury=120,troops=800,active=false,shielding=false,attacking=false,won=false,swing=0,block=0,yaw=0,pitch=0;
 const keys={},hpEl=document.querySelector('#hp'),stEl=document.querySelector('#st'),ehEl=document.querySelector('#eh'),msg=document.querySelector('#message');
-function hud(){hpEl.style.width=hp+'%';stEl.style.width=stamina+'%';ehEl.style.width=(enemy.alive?enemy.hp:0)+'%'}
+function hud(){hpEl.style.width=hp+'%';stEl.style.width=stamina+'%';ehEl.style.width=(enemy?.alive?enemy.hp/(enemy.maxHp||100)*100:0)+'%'}
 const fallen=[];
 function drop(mesh,pos,vel){const o=mesh.clone(true);o.traverse(v=>{if(v.isMesh){v.geometry=v.geometry.clone();v.material=v.material.clone()}});scene.add(o);o.position.copy(pos);o.userData.fallen=true;o.userData.v=vel.clone();o.userData.spin=new THREE.Vector3((Math.random()-.5)*5,(Math.random()-.5)*5,(Math.random()-.5)*5);fallen.push(o)}
-function defeat(){if(!enemy.alive)return;enemy.torso.remove(enemy.head);enemy.arms.forEach(a=>enemy.torso.remove(a));enemy.alive=false;enemy.root.visible=false;won=true;glory+=100;const parts=[[enemy.torso,new THREE.Vector3(0,1.05,0),new THREE.Vector3(-1,3,1)],[enemy.head,new THREE.Vector3(0,1.9,0),new THREE.Vector3(.8,3,-.5)],[enemy.arms[0],new THREE.Vector3(-.5,1.35,0),new THREE.Vector3(-3,3,1)],[enemy.arms[1],new THREE.Vector3(.5,1.35,0),new THREE.Vector3(3,2,-1)],[enemy.legs[0],new THREE.Vector3(-.2,.55,0),new THREE.Vector3(-1,2,2)],[enemy.legs[1],new THREE.Vector3(.2,.55,0),new THREE.Vector3(1,2,-2)],[enemy.enemySword,new THREE.Vector3(.7,1.1,0),new THREE.Vector3(2,3,1)],[enemy.enemyShield,new THREE.Vector3(-.7,1.1,0),new THREE.Vector3(-2,3,1)]];
-for(const [part,offset,vel] of parts){const wp=enemy.root.localToWorld(offset.clone());drop(part,wp,vel)}msg.textContent='GLORIA ROMAE';setTimeout(()=>{active=false;document.exitPointerLock?.();document.querySelector('#campaign').classList.remove('hidden')},1500)}
-function reset(){hp=100;stamina=100;enemy.hp=100;enemy.alive=true;enemy.root.visible=true;enemy.root.position.set(0,0,-5);enemy.root.rotation.set(0,Math.PI,0);enemy.legs.forEach(l=>l.rotation.set(0,0,0));enemy.arms.forEach(a=>a.rotation.set(0,0,0));enemy.torso.rotation.set(0,0,0);enemy.head.rotation.set(0,0,0);for(const p of fallen)scene.remove(p);fallen.length=0;won=false;active=true;attacking=false;swing=0;shielding=false;document.querySelector('#campaign').classList.add('hidden');document.querySelector('#start').classList.add('hidden');msg.textContent='';camera.position.set(0,1.7,8);yaw=0;pitch=0;hud()}
+function defeat(){
+ if(!enemy?.alive)return;enemy.alive=false;enemy.root.visible=false;glory+=100;treasury+=15;
+ enemies=enemies.filter(e=>e!==enemy);msg.textContent='HOSTILE DEFEATED · +15 DENARII';
+ if(enemies.length){enemy=enemies[0];hud();return;}
+ if(wave<5){active=false;setTimeout(()=>{wave++;spawnWave();active=true;msg.textContent='WAVE '+wave+' · '+enemies.length+' HOSTILES';setTimeout(()=>{if(active)msg.textContent=''},1600)},1400);}
+ else{won=true;active=false;document.exitPointerLock?.();document.querySelector('#campaignText').textContent='Campaign complete · Glory: '+glory+' · Treasury: '+treasury+' denarii · Legion: '+troops;document.querySelector('#campaign').classList.remove('hidden');}
+}
+function spawnWave(){
+ enemies.forEach(e=>scene.remove(e.root));enemies=[];
+ const count=Math.min(1+wave,5),scale=1+(wave-1)*.22;
+ for(let i=0;i<count;i++){const foe=makeEnemy((i-(count-1)/2)*3,-9-Math.floor(i/3)*3);foe.hp=Math.round(100*scale);foe.maxHp=foe.hp;foe.damage=8+(wave-1)*3;foe.speed=1.15+(wave-1)*.18;foe.guardChance=Math.min(.58,.12+(wave-1)*.1);foe.state='advance';foe.stateTimer=0;enemies.push(foe);}
+ enemy=enemies[0];const label=document.querySelector('#waveLabel');if(label)label.textContent='WAVE '+wave;hud();
+}
+function reset(){hp=100;stamina=100;wave=1;won=false;for(const p of fallen)scene.remove(p);fallen.length=0;enemies.forEach(e=>scene.remove(e.root));enemies=[];spawnWave();legion.forEach((s,i)=>{s.hp=100;s.root.visible=true;s.root.position.set(-2.4+i*1.6,0,10+Math.floor(i/2)*1.8)});legionOrder='FOLLOW';active=true;attacking=false;swing=0;shielding=false;document.querySelector('#campaign').classList.add('hidden');document.querySelector('#start').classList.add('hidden');msg.textContent='';camera.position.set(0,1.7,8);yaw=0;pitch=0;hud()}
 function enterArena(event){
   event?.preventDefault?.();
   if(active)return;
@@ -111,11 +131,20 @@ renderer.domElement.addEventListener('pointerdown',()=>{
 });
 document.querySelector('#next').addEventListener('click',()=>{reset();renderer.domElement.requestPointerLock?.()});
 document.querySelector('#recruit').onclick=()=>{if(treasury>=40){treasury-=40;troops+=150;document.querySelector('#campaignText').textContent='Treasury: '+treasury+' denarii · Legion: '+troops}};
-document.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyF')shielding=true;const wm={Digit1:'gladius',Digit2:'spear',Digit3:'pilum',Digit4:'spatha',Digit5:'axe',Digit6:'bow',Digit7:'dagger'};if(wm[e.code])selectWeapon(wm[e.code])});document.addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyF')shielding=false});
+document.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyF')shielding=true;if(e.code==='KeyQ')setLegionOrder('FOLLOW');if(e.code==='KeyE')setLegionOrder('HOLD');if(e.code==='KeyR')setLegionOrder('CHARGE');const wm={Digit1:'gladius',Digit2:'spear',Digit3:'pilum',Digit4:'spatha',Digit5:'axe',Digit6:'bow',Digit7:'dagger'};if(wm[e.code])selectWeapon(wm[e.code])});document.addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyF')shielding=false});
 document.addEventListener('mousemove',e=>{if(document.pointerLockElement===renderer.domElement){yaw-=e.movementX*.0021;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.0021,-1.15,1.15)}});
 renderer.domElement.addEventListener('click',()=>{if(active&&document.pointerLockElement!==renderer.domElement)renderer.domElement.requestPointerLock?.();else if(active)startAttack()});
 function startAttack(){if(attacking||stamina<14||won)return;attacking=true;swing=0;weaponGroups[selectedWeapon].userData.hit=false;stamina-=14;hud()}
-function hitEnemy(){const dx=enemy.root.position.x-camera.position.x,dz=enemy.root.position.z-camera.position.z,dist=Math.hypot(dx,dz);const f=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),to=new THREE.Vector3(dx,0,dz).normalize();if(enemy.alive&&dist<weaponStats[selectedWeapon].reach&&f.dot(to)>.32){enemy.hp=Math.max(0,enemy.hp-weaponStats[selectedWeapon].damage);enemy.hit=.2;enemy.root.position.addScaledVector(f,.25);enemy.torso.rotation.x=-.2;if(enemy.hp===0)defeat()}hud()}
+function hitEnemy(){
+ const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+ for(const foe of enemies){if(!foe.alive)continue;const dx=foe.root.position.x-camera.position.x,dz=foe.root.position.z-camera.position.z,d=Math.hypot(dx,dz),toward=new THREE.Vector3(dx,0,dz).normalize();
+ if(d<weaponStats[selectedWeapon].reach&&forward.dot(toward)>.25){
+  const guarded=foe.state==='guard'&&Math.random()<(foe.guardChance||.2);
+  foe.hp=Math.max(0,foe.hp-weaponStats[selectedWeapon].damage*(guarded?.25:1));
+  foe.hit=.25;if(!guarded){foe.state='stagger';foe.stateTimer=.45;foe.root.position.addScaledVector(forward,.35);msg.textContent='HIT · '+Math.ceil(foe.hp)+' ENEMY HEALTH';}else msg.textContent='THE ENEMY BLOCKED';
+  if(foe.hp<=0){enemy=foe;defeat();}break;
+ }}hud();
+}
 
 /* FRONTIER EXPANSION */
 const terrain={grass:mat(0x596044),scrub:mat(0x77704f),mud:mat(0x51483a),gravel:mat(0x817969),field:mat(0x88754d),water:new THREE.MeshStandardMaterial({color:0x425d62,roughness:.24,transparent:true,opacity:.9})};
@@ -141,12 +170,12 @@ for(let i=0;i<28;i++){const x=(Math.sin(i*12.31)*.5+.5)*150-75,z=(Math.cos(i*8.1
 const weaponGroups={gladius:sword};
 function handWeapon(type){const g=new THREE.Group();rig.add(g);
 if(type==='spear'||type==='pilum'){cyl(g,0,0,0,.035,.045,1.75,wood,7);cyl(g,0,.91,0,.012,.095,.42,type==='pilum'?iron:steel,6);if(type==='pilum')cyl(g,0,.55,0,.018,.018,.55,iron,6);g.position.set(.43,-.34,-.92)}
-if(type==='spath a'){box(g,0,.1,0,.095,1,.035,steel);box(g,0,-.48,0,.34,.07,.1,bronze);cyl(g,0,-.7,0,.045,.05,.35,leather,7);g.position.set(.48,-.36,-.82)}
+if(type==='spatha'){box(g,0,.1,0,.095,1,.035,steel);box(g,0,-.48,0,.34,.07,.1,bronze);cyl(g,0,-.7,0,.045,.05,.35,leather,7);g.position.set(.48,-.36,-.82)}
 if(type==='axe'){cyl(g,0,-.1,0,.04,.05,1.05,wood,7);const h=new THREE.Mesh(new THREE.BoxGeometry(.42,.36,.09),iron);h.position.set(.16,.35,0);g.add(h);const e=new THREE.Mesh(new THREE.BoxGeometry(.12,.43,.1),steel);e.position.set(.38,.35,0);g.add(e);g.position.set(.48,-.36,-.8)}
 if(type==='bow'){const curve=new THREE.QuadraticBezierCurve3(new THREE.Vector3(0,-.65,0),new THREE.Vector3(.42,0,0),new THREE.Vector3(0,.65,0));g.add(new THREE.Mesh(new THREE.TubeGeometry(curve,16,.035,5,false),wood));g.position.set(.48,-.34,-.82)}
 if(type==='dagger'){box(g,0,.18,0,.075,.58,.025,steel);box(g,0,-.18,0,.24,.05,.08,bronze);g.position.set(.48,-.38,-.78)}
 g.visible=false;return g}
-weaponGroups.spear=handWeapon('spear');weaponGroups.pilum=handWeapon('pilum');weaponGroups.spatha=handWeapon('spath a');weaponGroups.axe=handWeapon('axe');weaponGroups.bow=handWeapon('bow');weaponGroups.dagger=handWeapon('dagger');
+weaponGroups.spear=handWeapon('spear');weaponGroups.pilum=handWeapon('pilum');weaponGroups.spatha=handWeapon('spatha');weaponGroups.axe=handWeapon('axe');weaponGroups.bow=handWeapon('bow');weaponGroups.dagger=handWeapon('dagger');
 let selectedWeapon='gladius';
 const weaponStats={gladius:{damage:34,reach:3.2},spear:{damage:27,reach:4.5},pilum:{damage:42,reach:4.1},spatha:{damage:38,reach:3.8},axe:{damage:48,reach:2.9},bow:{damage:24,reach:18},dagger:{damage:19,reach:2.2}};
 function selectWeapon(name){if(!weaponGroups[name])return;selectedWeapon=name;for(const [key,obj] of Object.entries(weaponGroups))obj.visible=key===name;msg.textContent='EQUIPPED: '+name.toUpperCase();setTimeout(()=>{if(msg.textContent.startsWith('EQUIPPED:'))msg.textContent=''},900)}
@@ -203,7 +232,32 @@ function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDel
 if(active&&!won){const speed=((keys.ShiftLeft||keys.ShiftRight)?6:3.8)*dt;const f=(keys.KeyW?1:0)-(keys.KeyS?1:0),s=(keys.KeyD?1:0)-(keys.KeyA?1:0),v=new THREE.Vector3(s,0,-f);if(v.lengthSq())v.normalize().multiplyScalar(speed);v.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);camera.position.x=THREE.MathUtils.clamp(camera.position.x+v.x,-84,84);camera.position.z=THREE.MathUtils.clamp(camera.position.z+v.z,-84,84);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch;stamina=Math.min(100,stamina+(shielding?2.5:9)*dt);
 if(attacking){swing+=dt;const k=Math.min(1,swing/.48);weaponGroups[selectedWeapon].rotation.x=-k*.75;weaponGroups[selectedWeapon].rotation.z=-k*.9;if(k>=.34&&!weaponGroups[selectedWeapon].userData.hit){weaponGroups[selectedWeapon].userData.hit=true;hitEnemy()}if(k>=1){attacking=false;weaponGroups[selectedWeapon].rotation.set(0,0,0)}}
 block=THREE.MathUtils.damp(block,shielding?1:0,13,dt);shield.position.set(-.48+block*.16,-.38+block*.08,-.82+.18*block);shield.rotation.set(.04-block*.2,0,.12-block*.28);
-if(enemy.alive){const dx=camera.position.x-enemy.root.position.x,dz=camera.position.z-enemy.root.position.z,d=Math.hypot(dx,dz);enemy.root.rotation.y=Math.atan2(dx,dz);if(d>1.75){enemy.root.position.x+=dx/d*dt*1.2;enemy.root.position.z+=dz/d*dt*1.2;enemy.walk+=dt*7;enemy.legs[0].rotation.x=Math.sin(enemy.walk)*.42;enemy.legs[1].rotation.x=-Math.sin(enemy.walk)*.42;enemy.arms[0].rotation.x=-Math.sin(enemy.walk)*.25}else{enemy.cooldown-=dt;enemy.arms[1].rotation.x=THREE.MathUtils.damp(enemy.arms[1].rotation.x,-1.1,9,dt);if(enemy.cooldown<=0){enemy.cooldown=1.25;if(!shielding)hp=Math.max(0,hp-9);else stamina=Math.max(0,stamina-8);if(hp===0){active=false;msg.textContent='ROMA REMEMBERS';setTimeout(()=>document.querySelector('#start').classList.remove('hidden'),1300)}}}if(enemy.hit>0){enemy.hit-=dt;enemy.torso.rotation.x=THREE.MathUtils.damp(enemy.torso.rotation.x,0,8,dt)}else enemy.arms[1].rotation.x=THREE.MathUtils.damp(enemy.arms[1].rotation.x,0,5,dt)}
+for(const foe of enemies){
+ if(!foe.alive)continue;
+ const dx=camera.position.x-foe.root.position.x,dz=camera.position.z-foe.root.position.z,d=Math.hypot(dx,dz);
+ foe.root.rotation.y=Math.atan2(dx,dz);foe.cooldown=Math.max(0,foe.cooldown-dt);foe.stateTimer=Math.max(0,(foe.stateTimer||0)-dt);
+ if(foe.state==='windup'){
+  foe.arms[1].rotation.x=THREE.MathUtils.damp(foe.arms[1].rotation.x,-1.65,8,dt);
+  if(foe.stateTimer<=0){foe.state='recover';foe.cooldown=1.0;const facing=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),toward=new THREE.Vector3(dx,0,dz).normalize(),frontal=facing.dot(toward)>.25;
+   if(d<2.35&&(!shielding||stamina<12||!frontal)){hp=Math.max(0,hp-(foe.damage||9));msg.textContent='ENEMY STRIKE · FACE THE ATTACK AND HOLD F';}
+   else if(d<2.35){stamina=Math.max(0,stamina-12);msg.textContent='SHIELD BLOCK';}
+  }
+ }else if(foe.state==='recover'||foe.state==='stagger'){foe.arms[1].rotation.x=THREE.MathUtils.damp(foe.arms[1].rotation.x,0,6,dt);if(foe.stateTimer<=0)foe.state='advance';}
+ else if(d>2.05){foe.state='advance';const sp=foe.speed||1.2;foe.root.position.x+=dx/d*dt*sp;foe.root.position.z+=dz/d*dt*sp;foe.walk+=dt*7;foe.legs[0].rotation.x=Math.sin(foe.walk)*.42;foe.legs[1].rotation.x=-Math.sin(foe.walk)*.42;
+  if(d<5.5&&foe.cooldown<=0&&Math.random()<(foe.guardChance||.15)*dt*1.4){foe.state='guard';foe.stateTimer=.6;}
+ }else if(foe.cooldown<=0){foe.state='windup';foe.stateTimer=.68;foe.cooldown=1.7;}
+ if(foe.state==='guard')foe.enemyShield.position.x=THREE.MathUtils.damp(foe.enemyShield.position.x,-.25,8,dt);else foe.enemyShield.position.x=THREE.MathUtils.damp(foe.enemyShield.position.x,-.68,5,dt);
+ if(foe.hit>0){foe.hit-=dt;foe.torso.rotation.x=THREE.MathUtils.damp(foe.torso.rotation.x,0,8,dt);}
+}
+for(const soldier of legion){
+ if(soldier.hp<=0)continue;
+ const target=enemies.find(e=>e.alive);if(!target)continue;
+ const dx=target.root.position.x-soldier.root.position.x,dz=target.root.position.z-soldier.root.position.z,d=Math.hypot(dx,dz);
+ if(legionOrder==='FOLLOW'){const slot=legion.indexOf(soldier),tx=camera.position.x-2+(slot%2)*1.5,tz=camera.position.z+2+Math.floor(slot/2)*1.4,fx=tx-soldier.root.position.x,fz=tz-soldier.root.position.z,fd=Math.hypot(fx,fz);if(fd>1.1){soldier.root.position.x+=fx/fd*dt*2.2;soldier.root.position.z+=fz/fd*dt*2.2;}}
+ if(legionOrder==='CHARGE'||(legionOrder==='FOLLOW'&&d<2.1)){if(d>1.3){soldier.root.position.x+=dx/d*dt*2;soldier.root.position.z+=dz/d*dt*2;}else if(soldier.attack<=0){target.hp=Math.max(0,target.hp-7);soldier.attack=1.25;if(target.hp<=0){enemy=target;defeat();}}}
+ soldier.root.rotation.y=Math.atan2(dx,dz);soldier.attack=Math.max(0,soldier.attack-dt);
+}
+if(hp<=0&&active){active=false;msg.textContent='YOU HAVE FALLEN · PRESS ENTER TO RETRY';document.exitPointerLock?.();setTimeout(()=>{if(hp<=0)document.querySelector('#start').classList.remove('hidden')},1200);}
 hud()}
 for(const p of fallen){const v=p.userData.v;v.y-=9.8*dt;p.position.addScaledVector(v,dt);p.rotation.x+=p.userData.spin.x*dt;p.rotation.y+=p.userData.spin.y*dt;p.rotation.z+=p.userData.spin.z*dt;if(p.position.y<.16){p.position.y=.16;v.y*=-.2;v.x*=.72;v.z*=.72;p.userData.spin.multiplyScalar(.45);if(Math.abs(v.y)<.6)v.y=0}}
 renderer.render(scene,camera)}
