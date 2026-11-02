@@ -63,13 +63,13 @@ const arms=[],legs=[];for(const side of [-1,1]){const a=new THREE.Group();a.posi
 const enemyShield=makeShield(root);enemyShield.position.set(-.68,1.08,.04);enemyShield.scale.set(.88,.94,.9);const enemySword=makeSword(root);enemySword.position.set(.65,1.12,.05);enemySword.scale.set(.68,.68,.68);
 return {root,torso,head,arms,legs,enemyShield,enemySword,alive:true,hp:100,maxHp:100,walk:0,cooldown:0,hit:0,state:'advance',stateTimer:0,guardChance:.12}}
 let enemy=makeEnemy(0,-5),enemies=[enemy],wave=1,legionOrder='FOLLOW',legion=[];
-function makeLegionary(x,z){
+function makeLegionary(x,z,index=0){
  const root=new THREE.Group();scene.add(root);cyl(root,0,1.05,0,.32,.38,.78,red,8);ball(root,0,1.65,0,.2,skin);
  const helmet=new THREE.Mesh(new THREE.SphereGeometry(.23,8,6,0,Math.PI*2,0,Math.PI*.55),bronze);helmet.position.y=1.72;root.add(helmet);
  const shield=box(root,-.4,1.02,.12,.58,.88,.12,red);box(root,-.4,1.02,.2,.07,.7,.05,gold);box(root,.38,1.08,.18,.07,.7,.04,steel);
  return {root,shield,hp:100,attack:0};
 }
-for(let i=0;i<4;i++)legion.push(makeLegionary(-2.4+i*1.6,10+Math.floor(i/2)*1.8));
+for(let i=0;i<4;i++)legion.push(makeLegionary(-2.4+i*1.6,10+Math.floor(i/2)*1.8,i));
 function setLegionOrder(order){legionOrder=order;const t={FOLLOW:'LEGION: FOLLOW',HOLD:'LEGION: HOLD POSITION',CHARGE:'LEGION: CHARGE'};msg.textContent=t[order];setTimeout(()=>{if(msg.textContent===t[order])msg.textContent=''},1300);}
 
 let hp=100,stamina=100,glory=0,treasury=120,troops=800,active=false,shielding=false,attacking=false,won=false,swing=0,block=0,yaw=0,pitch=0;
@@ -87,7 +87,7 @@ function defeat(){
 function spawnWave(){
  enemies.forEach(e=>scene.remove(e.root));enemies=[];
  const count=Math.min(1+wave,5),scale=1+(wave-1)*.22;
- for(let i=0;i<count;i++){const foe=makeEnemy((i-(count-1)/2)*3,-9-Math.floor(i/3)*3);foe.hp=Math.round(100*scale);foe.maxHp=foe.hp;foe.damage=8+(wave-1)*3;foe.speed=1.15+(wave-1)*.18;foe.guardChance=Math.min(.58,.12+(wave-1)*.1);foe.state='advance';foe.stateTimer=0;enemies.push(foe);}
+ for(let i=0;i<count;i++){const foe=makeEnemy((i-(count-1)/2)*3,-9-Math.floor(i/3)*3);foe.hp=Math.round(100*scale);foe.maxHp=foe.hp;foe.damage=8+(wave-1)*3;foe.speed=1.15+(wave-1)*.18;foe.guardChance=Math.min(.58,.12+(wave-1)*.1);foe.classType=i%3===2?'archer':(i%2?'swordsman':'spearman');foe.state='advance';foe.stateTimer=0;enemies.push(foe);}
  enemy=enemies[0];const label=document.querySelector('#waveLabel');if(label)label.textContent='WAVE '+wave;hud();
 }
 function reset(){hp=100;stamina=100;wave=1;won=false;for(const p of fallen)scene.remove(p);fallen.length=0;enemies.forEach(e=>scene.remove(e.root));enemies=[];spawnWave();legion.forEach((s,i)=>{s.hp=100;s.root.visible=true;s.root.position.set(-2.4+i*1.6,0,10+Math.floor(i/2)*1.8)});legionOrder='FOLLOW';active=true;attacking=false;swing=0;shielding=false;document.querySelector('#campaign').classList.add('hidden');document.querySelector('#start').classList.add('hidden');msg.textContent='';camera.position.set(0,1.7,8);yaw=0;pitch=0;hud()}
@@ -133,7 +133,7 @@ renderer.domElement.addEventListener('pointerdown',()=>{
 });
 document.querySelector('#next').addEventListener('click',()=>{reset();renderer.domElement.requestPointerLock?.()});
 document.querySelector('#recruit').onclick=()=>{if(treasury>=40){treasury-=40;troops+=150;document.querySelector('#campaignText').textContent='Treasury: '+treasury+' denarii · Legion: '+troops}};
-document.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyF')shielding=true;if(e.code==='KeyQ')setLegionOrder('FOLLOW');if(e.code==='KeyT')setLegionOrder('HOLD');if(e.code==='KeyE')interact();if(e.code==='KeyI')toggleInventory();if(e.code==='KeyG')interact();if(e.code==='KeyR')setLegionOrder('CHARGE');const wm={Digit1:'gladius',Digit2:'spear',Digit3:'pilum',Digit4:'spatha',Digit5:'axe',Digit6:'bow',Digit7:'dagger'};if(wm[e.code])selectWeapon(wm[e.code])});document.addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyF')shielding=false});
+document.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyF')shielding=true;if(e.code==='KeyQ')setLegionOrder('FOLLOW');if(e.code==='KeyT')setLegionOrder('HOLD');if(e.code==='KeyE')interact();if(e.code==='KeyI')toggleInventory();if(e.code==='KeyG'){const hd=Math.hypot(camera.position.x-horse.position.x,camera.position.z-horse.position.z);if(mounted||hd<3.2){mounted=!mounted;msg.textContent=mounted?'MOUNTED · RIDE WITH WASD · G DISMOUNT':'DISMOUNTED';}}if(e.code==='KeyR')setLegionOrder('CHARGE');const wm={Digit1:'gladius',Digit2:'spear',Digit3:'pilum',Digit4:'spatha',Digit5:'axe',Digit6:'bow',Digit7:'dagger'};if(wm[e.code])selectWeapon(wm[e.code])});document.addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyF')shielding=false});
 document.addEventListener('mousemove',e=>{if(document.pointerLockElement===renderer.domElement){yaw-=e.movementX*.0021;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.0021,-1.15,1.15)}});
 renderer.domElement.addEventListener('click',()=>{if(active&&document.pointerLockElement!==renderer.domElement)renderer.domElement.requestPointerLock?.();else if(active)startAttack()});
 function startAttack(){if(selectedWeapon==='bow'){if(stamina<6||won)return;stamina-=6;fireArrow();hud();return;}if(attacking||stamina<14||won)return;attacking=true;swing=0;weaponGroups[selectedWeapon].userData.hit=false;stamina-=14;hud()}
@@ -153,7 +153,7 @@ function updateProjectiles(dt){
  for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.life-=dt;p.velocity.y-=9.8*dt;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,-1),p.velocity.clone().normalize());
   let hit=false;
   if(p.owner==='player'){for(const foe of enemies){if(foe.alive&&p.mesh.position.distanceTo(new THREE.Vector3(foe.root.position.x,1.15,foe.root.position.z))<.85){foe.hp=Math.max(0,foe.hp-p.damage);foe.state='stagger';foe.stateTimer=.35;msg.textContent='ARROW HIT · '+Math.ceil(foe.hp)+' HEALTH';if(foe.hp<=0){enemy=foe;defeat();}hit=true;break;}}}
-  else if(p.mesh.position.distanceTo(camera.position)<.8){if(!shielding)hp=Math.max(0,hp-p.damage);else stamina=Math.max(0,stamina-10);hit=true;msg.textContent=shielding?'ARROW DEFLECTED':'ARCHER ARROW HIT';}
+  else {for(const ally of legion){if(ally.hp>0&&p.mesh.position.distanceTo(new THREE.Vector3(ally.root.position.x,1.2,ally.root.position.z))<.7){ally.hp=Math.max(0,ally.hp-p.damage);if(ally.hp===0)ally.root.visible=false;hit=true;break;}}if(!hit&&p.mesh.position.distanceTo(camera.position)<.8){if(!shielding)hp=Math.max(0,hp-p.damage);else stamina=Math.max(0,stamina-10);hit=true;msg.textContent=shielding?'ARROW DEFLECTED':'ARCHER ARROW HIT';}}
   if(p.life<=0||p.mesh.position.y<.08||hit){scene.remove(p.mesh);projectiles.splice(i,1);}
  }
 }
@@ -163,7 +163,7 @@ function nearbyInteraction(){
  if(nearest&&dist<13){prompt.textContent='E · '+(nearest.discovered?(nearest.owner==='ROMAN'?'ROMAN GARRISON':'CAPTURE '+nearest.name):'DISCOVER '+nearest.name);prompt.style.display='block';}
  else {prompt.textContent='';prompt.style.display='none';}
  const horseDist=Math.hypot(camera.position.x-horse.position.x,camera.position.z-horse.position.z);
- if(horseDist<3.2){prompt.textContent='G · MOUNT HORSE';prompt.style.display='block';}
+ if(horseDist<3.2){prompt.textContent=mounted?'G · DISMOUNT':'G · MOUNT HORSE';prompt.style.display='block';}
 }
 function interact(){
  for(const site of frontierSites){if(Math.hypot(camera.position.x-site.x,camera.position.z-site.z)<13){
@@ -328,7 +328,7 @@ for(const foe of enemies){
    else if(d<2.35){stamina=Math.max(0,stamina-12);msg.textContent='SHIELD BLOCK';}
   }
  }else if(foe.state==='recover'||foe.state==='stagger'){foe.arms[1].rotation.x=THREE.MathUtils.damp(foe.arms[1].rotation.x,0,6,dt);if(foe.stateTimer<=0)foe.state='advance';}
- else if(d>2.05){foe.state='advance';const sp=foe.speed||1.2;foe.root.position.x+=dx/d*dt*sp;foe.root.position.z+=dz/d*dt*sp;foe.walk+=dt*7;foe.legs[0].rotation.x=Math.sin(foe.walk)*.42;foe.legs[1].rotation.x=-Math.sin(foe.walk)*.42;
+ else if(foe.classType==='archer'&&d>5){foe.state='advance';if(foe.cooldown<=0){const origin=foe.root.position.clone().add(new THREE.Vector3(0,1.55,0));const target=new THREE.Vector3(victim.x,1.2,victim.z);fireArrow('enemy',origin,target.sub(origin));foe.cooldown=2.5;}}\n else if(d>2.05){foe.state='advance';const sp=foe.speed||1.2;foe.root.position.x+=dx/d*dt*sp;foe.root.position.z+=dz/d*dt*sp;foe.walk+=dt*7;foe.legs[0].rotation.x=Math.sin(foe.walk)*.42;foe.legs[1].rotation.x=-Math.sin(foe.walk)*.42;
   if(d<5.5&&foe.cooldown<=0&&Math.random()<(foe.guardChance||.15)*dt*1.4){foe.state='guard';foe.stateTimer=.65;foe.cooldown=.85;}
  }else if(foe.cooldown<=0){foe.state='windup';foe.stateTimer=.68;foe.cooldown=1.7;}
  if(foe.state==='guard')foe.enemyShield.position.x=THREE.MathUtils.damp(foe.enemyShield.position.x,-.25,8,dt);else foe.enemyShield.position.x=THREE.MathUtils.damp(foe.enemyShield.position.x,-.68,5,dt);
