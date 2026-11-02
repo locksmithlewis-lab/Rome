@@ -332,7 +332,8 @@ for(const foe of enemies){
    else if(d<2.35){stamina=Math.max(0,stamina-12);msg.textContent='SHIELD BLOCK';}
   }
  }else if(foe.state==='recover'||foe.state==='stagger'){foe.arms[1].rotation.x=THREE.MathUtils.damp(foe.arms[1].rotation.x,0,6,dt);if(foe.stateTimer<=0)foe.state='advance';}
- else if(foe.classType==='archer'&&d>5){foe.state='advance';if(foe.cooldown<=0){const origin=foe.root.position.clone().add(new THREE.Vector3(0,1.55,0));const target=new THREE.Vector3(victim.x,1.2,victim.z);fireArrow('enemy',origin,target.sub(origin));foe.cooldown=2.5;}}\n else if(d>2.05){foe.state='advance';const sp=foe.speed||1.2;foe.root.position.x+=dx/d*dt*sp;foe.root.position.z+=dz/d*dt*sp;foe.walk+=dt*7;foe.legs[0].rotation.x=Math.sin(foe.walk)*.42;foe.legs[1].rotation.x=-Math.sin(foe.walk)*.42;
+ else if(foe.classType==='archer'&&d>5){foe.state='advance';if(foe.cooldown<=0){const origin=foe.root.position.clone().add(new THREE.Vector3(0,1.55,0));const target=new THREE.Vector3(victim.x,1.2,victim.z);fireArrow('enemy',origin,target.sub(origin));foe.cooldown=2.5;}}
+ else if(d>2.05){foe.state='advance';const sp=foe.speed||1.2;foe.root.position.x+=dx/d*dt*sp;foe.root.position.z+=dz/d*dt*sp;foe.walk+=dt*7;foe.legs[0].rotation.x=Math.sin(foe.walk)*.42;foe.legs[1].rotation.x=-Math.sin(foe.walk)*.42;
   if(d<5.5&&foe.cooldown<=0&&Math.random()<(foe.guardChance||.15)*dt*1.4){foe.state='guard';foe.stateTimer=.65;foe.cooldown=.85;}
  }else if(foe.cooldown<=0){foe.state='windup';foe.stateTimer=.68;foe.cooldown=1.7;}
  if(foe.state==='guard')foe.enemyShield.position.x=THREE.MathUtils.damp(foe.enemyShield.position.x,-.25,8,dt);else foe.enemyShield.position.x=THREE.MathUtils.damp(foe.enemyShield.position.x,-.68,5,dt);
